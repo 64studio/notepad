@@ -35,12 +35,53 @@ sudo apt-get install lighttpd libterm-readline-gnu-perl
 sudo chown www-data:www-data -R /var/www/
 sudo chmod g+rwxs /var/www/html
 sudo usermod -aG www-data chris
-sudo lighttpd-enable-mod dir-listing
+
+# remove the junk
 sudo rm /var/www/html/index.lighttpd.html
+
+# directory contents listing
+sudo lighttpd-enable-mod dir-listing
 echo "Welcome to the 64studio Ltd Debian Stretch build server." | sudo tee -a /var/www/html/README.txt
 echo "dir-listing.show-readme = \"enable\"" | sudo tee -a /etc/lighttpd/conf-enabled/10-dir-listing.conf
+echo "dir-listing.hide-readme-file = \"enable\"" | sudo tee -a /etc/lighttpd/conf-enabled/10-dir-listing.conf
 echo "dir-listing.set-footer = \" \"" | sudo tee -a /etc/lighttpd/conf-enabled/10-dir-listing.conf
 echo "dir-listing.external-js = \" \"" | sudo tee -a /etc/lighttpd/conf-enabled/10-dir-listing.conf
+
+# userdir enable
+sudo lighttpd-enable-mod userdir
+
+# access log enable
+# may be useful for some metrics later; but users' privacy is more important
+#sudo lighttpd-enable-mod accesslog
+
+# enable virtualhosts
+sudo mkdir /etc/lighttpd/vhosts.d
+sudo chown www-data:www-data -R /etc/lighttpd/vhosts.d
+echo include_shell \"cat /etc/lighttpd/vhosts.d/*.conf\" | sudo tee -a /etc/lighttpd/lighttpd.conf
+
+config files look like this:
+    /etc/lighttpd/vhosts.d/apt.64studio.com.conf
+$HTTP["host"] =~ "^(www\.)?apt\.64studio\.com" {
+    server.document-root = "/var/www/apt"
+    accesslog.filename = "/var/log/lighttpd/apt.64studio.com.access.log"
+}
+
+    /etc/lighttpd/vhosts.d/pdk.64studio.com.conf
+$HTTP["host"] =~ "^(www\.)?pdk\.64studio\.com" {
+    server.document-root = "/var/www/pdk"
+    accesslog.filename = "/var/log/lighttpd/pdk.64studio.com.access.log"
+}
+
+# change document root to /var/www rather than /var/www/html
+# i done this on the main server since we haven't yet moved the A records for the subdomains over
+# but in practive this would not be needed
+#sudo sed -i -e 's|/var/www/html|/var/www|g' /etc/lighttpd/lighttpd.conf
+#sudo rm -rf /var/www/cgi-bin
+#sudo rm -rf /var/www/html
+#sudo mv /var/www/html/README.txt /var/www/README.txt
+
+
+# restart to apply changes
 sudo systemctl restart lighttpd
 
 
