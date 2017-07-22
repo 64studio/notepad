@@ -17,4 +17,6 @@ chris@source$ gpg --output - --export-secret-key BB2128D2 | cat pubkey.gpg - | g
 `scp` keys.asc to your local machine, then scp it to the remote machine.
 
 Destination machine (it will ask for the passcode):
+```bash
 chris@destination$ gpg --no-use-agent --output - keys.asc | gpg --import 
+```
