@@ -58,19 +58,19 @@ sudo lighttpd-enable-mod userdir
 sudo mkdir /etc/lighttpd/vhosts.d
 sudo chown www-data:www-data -R /etc/lighttpd/vhosts.d
 echo include_shell \"cat /etc/lighttpd/vhosts.d/*.conf\" | sudo tee -a /etc/lighttpd/lighttpd.conf
-
-config files look like this:
-    /etc/lighttpd/vhosts.d/apt.64studio.com.conf
+# example configuration files:
+sudo cat > /etc/lighttpd/vhosts.d/apt.64studio.com.conf <<EOF
 $HTTP["host"] =~ "^(www\.)?apt\.64studio\.com" {
     server.document-root = "/var/www/apt"
     accesslog.filename = "/var/log/lighttpd/apt.64studio.com.access.log"
 }
-
-    /etc/lighttpd/vhosts.d/pdk.64studio.com.conf
+EOF
+sudo cat > /etc/lighttpd/vhosts.d/pdk.64studio.com.conf <<EOF
 $HTTP["host"] =~ "^(www\.)?pdk\.64studio\.com" {
     server.document-root = "/var/www/pdk"
     accesslog.filename = "/var/log/lighttpd/pdk.64studio.com.access.log"
 }
+EOF
 
 # change document root to /var/www rather than /var/www/html
 # i done this on the main server since we haven't yet moved the A records for the subdomains over
