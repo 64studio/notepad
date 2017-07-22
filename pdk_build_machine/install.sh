@@ -28,11 +28,16 @@ exit
 
 # setup the lighttpd server
 # login as regular user
+# (libterm-readline-gnu-perl is as per Debian bug #866737)
 
-sudo apt-get install lighttpd
+sudo apt-get install lighttpd libterm-readline-gnu-perl
+# add any users that will need write access to WWW to the www-data group
+sudo chown www-data:www-data -R /var/www/
+sudo chmod g+rwxs /var/www/html
+sudo usermod -aG www-data chris
 sudo lighttpd-enable-mod dir-listing
 sudo rm /var/www/html/index.lighttpd.html
-echo "Test!" | sudo tee -a /var/www/html/README.txt
+echo "Welcome to the 64studio Ltd Debian Stretch build server." | sudo tee -a /var/www/html/README.txt
 echo "dir-listing.show-readme = \"enable\"" | sudo tee -a /etc/lighttpd/conf-enabled/10-dir-listing.conf
 echo "dir-listing.set-footer = \" \"" | sudo tee -a /etc/lighttpd/conf-enabled/10-dir-listing.conf
 echo "dir-listing.external-js = \" \"" | sudo tee -a /etc/lighttpd/conf-enabled/10-dir-listing.conf
@@ -42,5 +47,32 @@ sudo systemctl restart lighttpd
 
 # setup reprepro & pbuilder
 # this pulls in a lot of packages. are they all needed?
+# qemu-user-static is for other arches (arm etc)
 
-sudo apt-get install reprepro pbuilder ubuntu-dev-tools
+sudo apt-get install reprepro pbuilder ubuntu-dev-tools qemu-user-static
+sudo apt-get install git devscripts cdbs
+
+# create pbuilder base images
+PBUILDER_RELEASE="stretch"
+PBUILDER_ARCHES="amd64 arm64 armel armhf"
+for PBUILDER_ARCH in $PBUILDER_ARCHES; do pbuilder-dist $PBUILDER_RELEASE $PBUILDER_ARCH create; done
+
+# make the package
+# update pbuilder base images
+for PBUILDER_ARCH in $PBUILDER_ARCHES; do pbuilder-dist $PBUILDER_RELEASE $PBUILDER_ARCH updage; done
+
+# build source package
+mkdir -p ~/source; cd ~/source
+git clone https://github.com/64studio/pdk.git
+cd pdk
+sudo mk-build-deps -i
+dpkg-buildpackage -S -I.git
+sudo apt-get purge --auto-remove pdk-build-deps
+cd ..
+
+# build binary package for each arch
+for PBUILDER_ARCH in $PBUILDER_ARCHES; do pbuilder-dist $PBUILDER_RELEASE $PBUILDER_ARCH build pdk_*.dsc; done
+
+# resuts are here (for stretch...)
+ls ~/pbuilder/stretch_result/
+
