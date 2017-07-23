@@ -72,6 +72,10 @@ $HTTP["host"] =~ "^(www\.)?pdk\.64studio\.com" {
 }
 EOF
 
+sudo chmod g+rwxs /var/www
+sudo mkdir /var/www/apt
+sudo mkdir /var/www/pdk
+
 # change document root to /var/www rather than /var/www/html
 # i done this on the main server since we haven't yet moved the A records for the subdomains over
 # but in practive this would not be needed
@@ -90,7 +94,7 @@ sudo systemctl restart lighttpd
 # this pulls in a lot of packages. are they all needed?
 # qemu-user-static is for other arches (arm etc)
 
-sudo apt-get install reprepro pbuilder ubuntu-dev-tools qemu-user-static
+sudo apt-get install pbuilder ubuntu-dev-tools qemu-user-static
 sudo apt-get install git devscripts cdbs
 
 # create pbuilder base images
@@ -117,3 +121,59 @@ for PBUILDER_ARCH in $PBUILDER_ARCHES; do pbuilder-dist $PBUILDER_RELEASE $PBUIL
 # resuts are here (for stretch...)
 ls ~/pbuilder/stretch_result/
 
+
+
+# setup reprepro
+sudo apt-get install reprepro
+
+cd /var/www/apt
+mkdir conf
+
+cat > conf/distributions <<EOF
+Origin: 64studio
+Label: 64studio
+Suite: stable
+Codename: stretch
+Architectures: amd64 arm64 armhf armel source
+Components: main non-free contrib
+Description: 64studio APT repo
+SignWith: A2D215E39D171B651CA95A4A5423B4D6BB2128D2
+DebOverride: override
+DscOverride: override
+EOF
+
+cat > conf/options <<EOF
+verbose
+basedir /var/www/apt
+ask-passphrase
+EOF
+
+touch conf/override
+
+
+# add in the changes file
+reprepro --ignore=wrongdistribution include stretch ~/pbuilder/stretch_result/pdk_1.0.0~alpha1_amd64.changes
+
+# export repo (this is be done automatically above)
+#reprepro export
+
+# build smart & add to repo
+cd ~
+mkdir smart; cd smart
+git clone https://github.com/64studio/smart.git
+cd smart
+sudo mk-build-deps -i
+dpkg-buildpackage -S -aamd64 -I.git
+sudo apt-get purge --auto-remove smart-build-deps
+pbuilder-dist stretch amd64 update
+pbuilder-dist stretch amd64 build ../smart*.dsc
+reprepro -b /var/www/apt --ignore=wrongdistribution include stretch ~/pbuilder/stretch_result/smart*_amd64.changes
+
+
+
+
+# when making a GPG key do this for quicker randoms
+
+sudo apt-get install haveged
+sudo systemctl start haveged # not sure if needed?
+gpg --generate-key
