@@ -17,13 +17,11 @@ chown chris:chris /home/chris/.ssh
 chown chris:chris /home/chris/.ssh/authorized_keys
 
 # secure SSH
-# edit /etc/ssh/sshd_config
-Replace "PermitRootLogin yes" with "PermitRootLogin no"
-these are added at the bottom?
-ClientAliveInterval 120
-PasswordAuthentication no
-
-
+# Replace "PermitRootLogin yes" with "PermitRootLogin no"
+sed -i "s|[#]*PermitRootLogin.*|PermitRootLogin no|g" "/etc/ssh/sshd_config"
+# these are added at the bottom of digitaloceans /etc/ssh/sshd_config, are they important?
+# ClientAliveInterval 120
+# PasswordAuthentication no
 systemctl restart sshd
 exit
 
@@ -32,7 +30,6 @@ exit
 # setup the lighttpd server
 # login as regular user
 # (libterm-readline-gnu-perl is as per Debian bug #866737)
-
 sudo apt-get install lighttpd libterm-readline-gnu-perl
 # add any users that will need write access to WWW to the www-data group
 sudo chown www-data:www-data -R /var/www/
@@ -137,8 +134,8 @@ Origin: 64studio
 Label: 64studio
 Suite: stable
 Codename: stretch
-Architectures: amd64 arm64 armhf armel source
-Components: main non-free contrib
+Architectures: amd64
+Components: main
 Description: 64studio APT repo
 SignWith: A2D215E39D171B651CA95A4A5423B4D6BB2128D2
 DebOverride: override
