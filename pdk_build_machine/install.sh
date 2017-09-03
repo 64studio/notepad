@@ -1,9 +1,12 @@
-# updat
+# set timezone
+sudo timedatectl set-timezone Europe/London
+
+# update packages
 apt-get update
 apt-get upgrade
 apt-get dist-upgrade
 
-# add user chris
+# add user chris $ ssh public key
 adduser chris
 usermod -aG sudo chris
 mkdir /home/chris/.ssh
