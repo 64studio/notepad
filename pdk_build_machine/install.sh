@@ -16,6 +16,13 @@ chmod 600 /home/chris/.ssh/authorized_keys
 chown chris:chris /home/chris/.ssh
 chown chris:chris /home/chris/.ssh/authorized_keys
 
+cat >>~/.bashrc <<EOF
+DEBEMAIL="chris@64studio.com"
+DEBFULLNAME="Chris O"
+export DEBEMAIL DEBFULLNAME
+EOF
+
+
 # secure SSH
 # Replace "PermitRootLogin yes" with "PermitRootLogin no"
 sed -i "s|[#]*PermitRootLogin.*|PermitRootLogin no|g" "/etc/ssh/sshd_config"
@@ -134,7 +141,18 @@ Origin: 64studio
 Label: 64studio
 Suite: stable
 Codename: stretch
-Architectures: amd64
+Architectures: amd64 armhf source
+Components: main
+Description: 64studio APT repo
+SignWith: A2D215E39D171B651CA95A4A5423B4D6BB2128D2
+DebOverride: override
+DscOverride: override
+
+Origin: 64studio
+Label: 64studio
+Suite: stable
+Codename: stretch-backports
+Architectures: amd64 armhf source
 Components: main
 Description: 64studio APT repo
 SignWith: A2D215E39D171B651CA95A4A5423B4D6BB2128D2
