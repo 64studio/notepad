@@ -195,3 +195,6 @@ reprepro -b /var/www/apt --ignore=wrongdistribution include stretch ~/pbuilder/s
 sudo apt-get install haveged
 sudo systemctl start haveged # not sure if needed?
 gpg --generate-key
+
+# export public key
+gpg --export --armor apt@64studio.com > /var/www/apt/pub.key
