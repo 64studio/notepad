@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+#
+# Creates user & imports ssh key(s) from GitHub.
+#
+# This also adds the user to the sudo group.
+#
+# usage: setup_user <username> <github_username>
+#        setup_user chris obbardc
+
+USERNAME=$1
+GITHUB_USERNAME=$2
+
+HOMEDIR=/home/$USERNAME
+
+# add the user
+adduser $USERNAME
+
+# add the user to the sudo group
+usermod -aG sudo $USERNAME
+
+# import SSH key from github
+mkdir $HOMEDIR/.ssh
+curl https://github.com/$GITHUB_USERNAME.keys | tee -a $HOMEDIR/.ssh/authorized_keys
+chmod 700 $HOMEDIR/.ssh
+chmod 600 $HOMEDIR/.ssh/authorized_keys
+chown $USERNAME:$USERNAME $HOMEDIR/.ssh
+chown $USERNAME:$USERNAME $HOMEDIR/.ssh/authorized_keys
