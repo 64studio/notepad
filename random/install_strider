@@ -1,0 +1,7 @@
+./install_nodejs_stable
+
+sudo apt-get install mongodb
+
+
+sudo su -c "npm install -g strider"
+
