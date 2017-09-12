@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#
+# performs initial setup of the machine
+
+# set timezone
+timedatectl set-timezone Europe/London
+
+# update packages
+apt-get update
+apt-get dist-upgrade
