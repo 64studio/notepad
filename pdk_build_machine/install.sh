@@ -1,36 +1,8 @@
-# set timezone
-sudo timedatectl set-timezone Europe/London
-
-# update packages
-apt-get update
-apt-get upgrade
-apt-get dist-upgrade
-
-# add user chris $ ssh public key
-adduser chris
-usermod -aG sudo chris
-mkdir /home/chris/.ssh
-echo "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAhPa8R9jgFJ2gv2bhCBMgEyniBsgyOtAQVm1NiycVEorpQSCBSlaqTy97k3Ro+lSgMuB5VwPZOZoUdawzUokTI+XCg7RZMi8GiTPfdAUr/AlsrVz4lTb3yoyGpIBVNvXAsf4gusHZSVhKQhJR2FfENfizkXSGOxLHbItl+I+GEtjgAdulba3S+Mx+ROhyDu8G6obf+wwqD3a3pg7w0vvReQt3wC0rMNS3voz8BW5OmZc2XZN5IWa9pVEDIKa1jAvE+QKXUAc6mOOGdjxT7+5Q/qV50QVtcEPcOmRJVW3yHhriEvy+OXA1eebUG62nmR+rY72we3Yjgyp20qz+3ILpEw==" > /home/chris/.ssh/authorized_keys
-chmod 700 /home/chris/.ssh
-chmod 600 /home/chris/.ssh/authorized_keys
-chown chris:chris /home/chris/.ssh
-chown chris:chris /home/chris/.ssh/authorized_keys
-
 cat >>~/.bashrc <<EOF
 DEBEMAIL="chris@64studio.com"
 DEBFULLNAME="Chris O"
 export DEBEMAIL DEBFULLNAME
 EOF
-
-
-# secure SSH
-# Replace "PermitRootLogin yes" with "PermitRootLogin no"
-sed -i "s|[#]*PermitRootLogin.*|PermitRootLogin no|g" "/etc/ssh/sshd_config"
-# these are added at the bottom of digitaloceans /etc/ssh/sshd_config, are they important?
-# ClientAliveInterval 120
-# PasswordAuthentication no
-systemctl restart sshd
-exit
 
 
 
