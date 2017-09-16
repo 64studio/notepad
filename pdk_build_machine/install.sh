@@ -1,26 +1,18 @@
-cat >>~/.bashrc <<EOF
-DEBEMAIL="chris@64studio.com"
-DEBFULLNAME="Chris O"
-export DEBEMAIL DEBFULLNAME
-EOF
-
-
-
-# setup the lighttpd server
-# login as regular user
+# install lighttpd
 # (libterm-readline-gnu-perl is as per Debian bug #866737)
 sudo apt-get install lighttpd libterm-readline-gnu-perl
+
 # add any users that will need write access to WWW to the www-data group
 sudo chown www-data:www-data -R /var/www/
 sudo chmod g+rwxs /var/www/html
 sudo usermod -aG www-data chris
 
-# remove the junk
+# remove the default index page
 sudo rm /var/www/html/index.lighttpd.html
 
 # directory contents listing
 sudo lighttpd-enable-mod dir-listing
-echo "Welcome to the 64studio Ltd Debian Stretch build server." | sudo tee -a /var/www/html/README.txt
+echo "Welcome to the 64studio Ltd PDK server." | sudo tee -a /var/www/html/README.txt
 echo "dir-listing.show-readme = \"enable\"" | sudo tee -a /etc/lighttpd/conf-enabled/10-dir-listing.conf
 echo "dir-listing.hide-readme-file = \"enable\"" | sudo tee -a /etc/lighttpd/conf-enabled/10-dir-listing.conf
 echo "dir-listing.set-footer = \" \"" | sudo tee -a /etc/lighttpd/conf-enabled/10-dir-listing.conf
@@ -38,16 +30,16 @@ sudo mkdir /etc/lighttpd/vhosts.d
 sudo chown www-data:www-data -R /etc/lighttpd/vhosts.d
 echo include_shell \"cat /etc/lighttpd/vhosts.d/*.conf\" | sudo tee -a /etc/lighttpd/lighttpd.conf
 # example configuration files:
-sudo cat > /etc/lighttpd/vhosts.d/apt.64studio.com.conf <<EOF
-$HTTP["host"] =~ "^(www\.)?apt\.64studio\.com" {
+sudo tee -a /etc/lighttpd/vhosts.d/apt.64studio.net.conf <<EOF
+\$HTTP["host"] =~ "^(www\.)?apt\.64studio\.net" {
     server.document-root = "/var/www/apt"
-    accesslog.filename = "/var/log/lighttpd/apt.64studio.com.access.log"
+    accesslog.filename = "/var/log/lighttpd/apt.64studio.net.access.log"
 }
 EOF
-sudo cat > /etc/lighttpd/vhosts.d/pdk.64studio.com.conf <<EOF
-$HTTP["host"] =~ "^(www\.)?pdk\.64studio\.com" {
+sudo tee -a /etc/lighttpd/vhosts.d/pdk.64studio.net.conf <<EOF
+\$HTTP["host"] =~ "^(www\.)?pdk\.64studio\.net" {
     server.document-root = "/var/www/pdk"
-    accesslog.filename = "/var/log/lighttpd/pdk.64studio.com.access.log"
+    accesslog.filename = "/var/log/lighttpd/pdk.64studio.net.access.log"
 }
 EOF
 
